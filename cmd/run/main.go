@@ -2,18 +2,20 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/Oleja123/dcaa-property/internal/config"
+	propertyhandler "github.com/Oleja123/dcaa-property/internal/handler/property"
 	propertydb "github.com/Oleja123/dcaa-property/internal/repository/property/db"
+	propertyservice "github.com/Oleja123/dcaa-property/internal/service/property"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
 	_ "github.com/lib/pq"
 )
 
 func main() {
 	config, err := config.LoadConfig("config.yaml")
-	fmt.Println(config)
 
 	if err != nil {
 		log.Fatal(err)
@@ -27,19 +29,25 @@ func main() {
 
 	repository := propertydb.NewRepository(client)
 
-	all, err := repository.FindAll(ctx)
-	if err != nil {
-		log.Fatal(err)
+	service := propertyservice.NewService(repository)
+
+	handler := propertyhandler.NewHandler(service)
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/properties", handler.FindAll)
+	mux.HandleFunc("/properties/{id}", handler.FindOne)
+	mux.HandleFunc("/properties/create", handler.Create)
+	mux.HandleFunc("/properties/update", handler.Update)
+	mux.HandleFunc("/properties/delete/{id}", handler.Delete)
+
+	s := http.Server{
+		Addr:         ":8080",
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 90 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Handler:      mux,
 	}
 
-	for _, val := range all {
-		fmt.Println(val)
-	}
-
-	val, err := repository.FindOne(ctx, 1)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(val)
+	s.ListenAndServe()
 }
