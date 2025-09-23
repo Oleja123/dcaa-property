@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
-	propertyservice "github.com/Oleja123/dcaa-property/internal/domain/property/service"
-	propertymock "github.com/Oleja123/dcaa-property/internal/domain/property/storage/mock"
+	propertymock "github.com/Oleja123/dcaa-property/internal/repository/property"
+	propertyservice "github.com/Oleja123/dcaa-property/internal/service/property"
 	"github.com/stretchr/testify/assert"
 )
 

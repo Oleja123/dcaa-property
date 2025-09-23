@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/Oleja123/dcaa-property/internal/config"
-	propertydb "github.com/Oleja123/dcaa-property/internal/domain/property/storage/db"
+	propertydb "github.com/Oleja123/dcaa-property/internal/repository/property/db"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
 	_ "github.com/lib/pq"
 )
