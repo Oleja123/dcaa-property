@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
-	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
+	"github.com/Oleja123/dcaa-property/pkg/client"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type repository struct {
-	client postgresql.Client
+	client client.Client
 }
 
 func (r *repository) Create(ctx context.Context, p property.Property) (int, error) {
@@ -105,7 +105,7 @@ func (r *repository) Update(ctx context.Context, p property.Property) error {
 	return nil
 }
 
-func NewRepository(client postgresql.Client) property.Repository {
+func NewRepository(client client.Client) property.Repository {
 	return &repository{
 		client: client,
 	}
