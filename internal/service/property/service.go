@@ -19,7 +19,11 @@ func (ps *propertyService) PropertyToDTO(p property.Property) propertydto.Proper
 	dto.Addr = p.Addr
 	dto.CategoryId = p.CategoryId
 	dto.Name = p.Name
-	dto.Price = p.Price.Float64
+	if !p.Price.Valid {
+		dto.Price = -1
+	} else {
+		dto.Price = p.Price.Float64
+	}
 	dto.Info = p.Info.String
 	dto.Id = p.Id
 	dto.LastUpdate = p.LastUpdate.Format(time.RFC3339)
