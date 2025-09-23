@@ -3,6 +3,7 @@ package propertydb
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
@@ -15,15 +16,14 @@ type repository struct {
 
 func (r *repository) Create(ctx context.Context, p property.Property) (int, error) {
 	q := `
-		INSERT INTO properties (addr, price, info, category_id, property_name) 
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO properties (addr, price, info, category_id, property_name, last_update) 
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id
 	`
-	err := r.client.QueryRow(ctx, q, p.Addr, p.Price, p.Info, p.CategoryId, p.Name).Scan(&p.Id)
+	err := r.client.QueryRow(ctx, q, p.Addr, p.Price, p.Info, p.CategoryId, p.Name, time.Now()).Scan(&p.Id)
 	if err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
-			fmt.Printf("SQL Error: %s, Detail: %s, Where: %s\n", pgErr.Message, pgErr.Detail, pgErr.Detail)
-			return 0, nil
+			return 0, fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s", pgErr.Message, pgErr.Detail, pgErr.Where)
 		}
 		return 0, err
 	}
@@ -31,7 +31,17 @@ func (r *repository) Create(ctx context.Context, p property.Property) (int, erro
 }
 
 func (r *repository) Delete(ctx context.Context, id int) error {
-	panic("unimplemented")
+	q := `
+		DELETE FROM properties WHERE id = $1
+	`
+	_, err := r.client.Exec(ctx, q, id)
+	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			return fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s", pgErr.Message, pgErr.Detail, pgErr.Where)
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *repository) FindAll(ctx context.Context) ([]property.Property, error) {
@@ -43,6 +53,7 @@ func (r *repository) FindAll(ctx context.Context) ([]property.Property, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	properties := make([]property.Property, 0)
 	for rows.Next() {
@@ -78,8 +89,20 @@ func (r *repository) FindOne(ctx context.Context, id int) (property.Property, er
 	return p, nil
 }
 
-func (r *repository) Update(ctx context.Context, property property.Property) error {
-	panic("unimplemented")
+func (r *repository) Update(ctx context.Context, p property.Property) error {
+	q := `
+		UPDATE properties SET addr = $1, property_name = $2, price = $3, info = $4, category_id = $5, last_update = $6
+		WHERE id = $7
+	`
+
+	_, err := r.client.Exec(ctx, q, p.Addr, p.Name, p.Price, p.Info, p.CategoryId, time.Now(), p.Id)
+	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			return fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s", pgErr.Message, pgErr.Detail, pgErr.Where)
+		}
+		return err
+	}
+	return nil
 }
 
 func NewRepository(client postgresql.Client) property.Repository {

@@ -12,14 +12,11 @@ import (
 )
 
 func main() {
-	config := config.DatabaseConfig{
-		Username:         "root",
-		Password:         "root",
-		Database:         "agency",
-		Port:             "5432",
-		Host:             "127.0.0.1",
-		MaxAttempts:      5,
-		SecondsToConnect: 5,
+	config, err := config.LoadConfig("config.yaml")
+	fmt.Println(config)
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	ctx := context.Background()
@@ -38,4 +35,11 @@ func main() {
 	for _, val := range all {
 		fmt.Println(val)
 	}
+
+	val, err := repository.FindOne(ctx, 1)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(val)
 }
