@@ -8,7 +8,8 @@ type PropertyDTO struct {
 	Addr       string  `json:"addr"`
 	Price      float64 `json:"price"`
 	Info       string  `json:"info"`
-	CategoryId string  `json:"category_id"`
+	CategoryId int     `json:"category_id"`
+	LastUpdate string  `json:"last_update"`
 }
 
 type ExtendedPropertyDTO struct {
@@ -17,6 +18,7 @@ type ExtendedPropertyDTO struct {
 	Addr       string               `json:"addr"`
 	Price      float64              `json:"price"`
 	Info       string               `json:"info"`
-	CategoryId string               `json:"category_id"`
+	CategoryId int                  `json:"category_id"`
 	Category   category.CategoryDTO `json:"category"`
+	LastUpdate string               `json:"last_update"`
 }
