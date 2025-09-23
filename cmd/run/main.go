@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/Oleja123/dcaa-property/internal/config"
+	propertydb "github.com/Oleja123/dcaa-property/internal/domain/property/db"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
 	_ "github.com/lib/pq"
 )
@@ -21,8 +23,19 @@ func main() {
 	}
 
 	ctx := context.Background()
-	_, err := postgresql.NewClient(ctx, config)
+	client, err := postgresql.NewClient(ctx, config)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	repository := propertydb.NewRepository(client)
+
+	all, err := repository.FindAll(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, val := range all {
+		fmt.Println(val)
 	}
 }
