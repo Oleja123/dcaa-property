@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Oleja123/dcaa-property/internal/domain/property"
+	propertydto "github.com/Oleja123/dcaa-property/internal/dto/property"
 	propertymock "github.com/Oleja123/dcaa-property/internal/repository/property"
 	propertyservice "github.com/Oleja123/dcaa-property/internal/service/property"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +15,7 @@ func TestPropertyService(t *testing.T) {
 	repo := &propertymock.MockPropertyRepo{}
 	service := propertyservice.NewService(repo)
 
-	dto := property.PropertyDTO{
+	dto := propertydto.PropertyDTO{
 		Name:       "Villa",
 		Addr:       "Ocean Drive",
 		Price:      500000,

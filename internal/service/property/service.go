@@ -7,14 +7,15 @@ import (
 	"time"
 
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
+	propertydto "github.com/Oleja123/dcaa-property/internal/dto/property"
 )
 
 type propertyService struct {
 	repository property.Repository
 }
 
-func (ps *propertyService) PropertyToDTO(p property.Property) property.PropertyDTO {
-	dto := property.PropertyDTO{}
+func (ps *propertyService) PropertyToDTO(p property.Property) propertydto.PropertyDTO {
+	dto := propertydto.PropertyDTO{}
 	dto.Addr = p.Addr
 	dto.CategoryId = p.CategoryId
 	dto.Name = p.Name
@@ -25,7 +26,7 @@ func (ps *propertyService) PropertyToDTO(p property.Property) property.PropertyD
 	return dto
 }
 
-func (ps *propertyService) PropertyFromDTO(ctx context.Context, dto property.PropertyDTO) property.Property {
+func (ps *propertyService) PropertyFromDTO(ctx context.Context, dto propertydto.PropertyDTO) property.Property {
 	p := property.Property{}
 	if dto.Id != 0 {
 		if res, err := ps.repository.FindOne(ctx, dto.Id); err == nil {
@@ -57,7 +58,7 @@ func (ps *propertyService) PropertyFromDTO(ctx context.Context, dto property.Pro
 	return p
 }
 
-func (ps *propertyService) Create(ctx context.Context, dto property.PropertyDTO) (int, error) {
+func (ps *propertyService) Create(ctx context.Context, dto propertydto.PropertyDTO) (int, error) {
 	property := ps.PropertyFromDTO(ctx, dto)
 	id, err := ps.repository.Create(ctx, property)
 	if err != nil {
@@ -67,7 +68,7 @@ func (ps *propertyService) Create(ctx context.Context, dto property.PropertyDTO)
 	return id, nil
 }
 
-func (ps *propertyService) Update(ctx context.Context, dto property.PropertyDTO) error {
+func (ps *propertyService) Update(ctx context.Context, dto propertydto.PropertyDTO) error {
 	pr := ps.PropertyFromDTO(ctx, dto)
 	err := ps.repository.Update(ctx, pr)
 	if err != nil {
@@ -86,13 +87,13 @@ func (ps *propertyService) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func (ps *propertyService) FindAll(ctx context.Context) ([]property.PropertyDTO, error) {
+func (ps *propertyService) FindAll(ctx context.Context) ([]propertydto.PropertyDTO, error) {
 	pr, err := ps.repository.FindAll(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil, fmt.Errorf("ошибка при получении списка записей собственностей")
 	}
-	res := make([]property.PropertyDTO, 0, len(pr))
+	res := make([]propertydto.PropertyDTO, 0, len(pr))
 	for _, val := range pr {
 		res = append(res, ps.PropertyToDTO(val))
 	}
@@ -100,11 +101,11 @@ func (ps *propertyService) FindAll(ctx context.Context) ([]property.PropertyDTO,
 	return res, nil
 }
 
-func (ps *propertyService) FindOne(ctx context.Context, id int) (property.PropertyDTO, error) {
+func (ps *propertyService) FindOne(ctx context.Context, id int) (propertydto.PropertyDTO, error) {
 	pr, err := ps.repository.FindOne(ctx, id)
 	if err != nil {
 		fmt.Println(err)
-		return property.PropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d", id)
+		return propertydto.PropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d", id)
 	}
 
 	return ps.PropertyToDTO(pr), nil
