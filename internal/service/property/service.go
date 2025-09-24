@@ -8,6 +8,7 @@ import (
 
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
 	propertydto "github.com/Oleja123/dcaa-property/internal/dto/property"
+	optionalType "github.com/denpa16/optional-go-type"
 )
 
 type propertyService struct {
@@ -16,46 +17,42 @@ type propertyService struct {
 
 func (ps *propertyService) PropertyToDTO(p property.Property) propertydto.PropertyDTO {
 	dto := propertydto.PropertyDTO{}
-	dto.Addr = p.Addr
-	dto.CategoryId = p.CategoryId
-	dto.Name = p.Name
+	dto.Addr = optionalType.NewOptionalString(&p.Addr)
+	dto.CategoryId = optionalType.NewOptionalInt(&p.CategoryId)
+	dto.Name = optionalType.NewOptionalString(&p.Name)
 	if !p.Price.Valid {
-		dto.Price = -1
+		dto.Price = optionalType.NewOptionalFloat64(nil)
 	} else {
-		dto.Price = p.Price.Float64
+		dto.Price = optionalType.NewOptionalFloat64(&p.Price.Float64)
 	}
-	dto.Info = p.Info.String
-	dto.Id = p.Id
-	dto.LastUpdate = p.LastUpdate.Format(time.RFC3339)
+	if !p.Info.Valid {
+		dto.Info = optionalType.NewOptionalString(nil)
+	} else {
+		dto.Info = optionalType.NewOptionalString(&p.Info.String)
+	}
+	dto.Id = optionalType.NewOptionalInt(&p.Id)
+	lastUpdateStr := p.LastUpdate.Format(time.RFC3339)
+	dto.LastUpdate = optionalType.NewOptionalString(&lastUpdateStr)
 	return dto
 }
 
 func (ps *propertyService) PropertyFromDTO(ctx context.Context, dto propertydto.PropertyDTO) property.Property {
 	p := property.Property{}
-	if dto.Id != 0 {
-		if res, err := ps.repository.FindOne(ctx, dto.Id); err == nil {
-			p = res
-		}
-		p.Id = dto.Id
+	p.Addr = *dto.Addr.Value
+	p.CategoryId = *dto.CategoryId.Value
+	p.Name = *dto.Name.Value
+	if dto.Id.Valid {
+		p.Id = *dto.Id.Value
 	}
-	if dto.Addr != "" {
-		p.Addr = dto.Addr
-	}
-	if dto.CategoryId != 0 {
-		p.CategoryId = dto.CategoryId
-	}
-	if dto.Name != "" {
-		p.Name = dto.Name
-	}
-	if dto.Price != 0 {
+	if dto.Price.Valid {
 		p.Price = sql.NullFloat64{
-			Float64: dto.Price,
+			Float64: *dto.Price.Value,
 			Valid:   true,
 		}
 	}
-	if dto.Info != "" {
+	if dto.Info.Valid {
 		p.Info = sql.NullString{
-			String: dto.Info,
+			String: *dto.Info.Value,
 			Valid:  true,
 		}
 	}
@@ -77,7 +74,7 @@ func (ps *propertyService) Update(ctx context.Context, dto propertydto.PropertyD
 	err := ps.repository.Update(ctx, pr)
 	if err != nil {
 		fmt.Println(err)
-		return fmt.Errorf("ошибка при обновлении сущности собственности с id: %d", dto.Id)
+		return fmt.Errorf("ошибка при обновлении сущности собственности с id: %d", *dto.Id.Value)
 	}
 	return nil
 }

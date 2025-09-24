@@ -30,6 +30,11 @@ func (h *PropertyHandler) Create(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !dto.Validate(false) {
+		http.Error(rw, "неправильное тело запроса", http.StatusBadRequest)
+		return
+	}
+
 	id, err := h.service.Create(r.Context(), dto)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -82,11 +87,16 @@ func (h *PropertyHandler) Update(rw http.ResponseWriter, r *http.Request) {
 
 	var dto propertydto.PropertyDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		http.Error(rw, "invalid request body", http.StatusBadRequest)
+		http.Error(rw, "неправильное тело запроса", http.StatusBadRequest)
 		return
 	}
 
-	if _, err := h.service.FindOne(r.Context(), dto.Id); err != nil {
+	if !dto.Validate(true) {
+		http.Error(rw, "неправильное тело запроса", http.StatusBadRequest)
+		return
+	}
+
+	if _, err := h.service.FindOne(r.Context(), *dto.Id.Value); err != nil {
 		http.Error(rw, err.Error(), http.StatusNotFound)
 		return
 	}
