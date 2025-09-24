@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Oleja123/dcaa-property/internal/config"
 	propertyhandler "github.com/Oleja123/dcaa-property/internal/handler/property"
 	propertydb "github.com/Oleja123/dcaa-property/internal/repository/property/db"
 	propertyservice "github.com/Oleja123/dcaa-property/internal/service/property"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
+	"github.com/Oleja123/dcaa-property/pkg/config"
 	_ "github.com/lib/pq"
 )
 

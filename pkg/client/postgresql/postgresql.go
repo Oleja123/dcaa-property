@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Oleja123/dcaa-property/internal/config"
+	"github.com/Oleja123/dcaa-property/pkg/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

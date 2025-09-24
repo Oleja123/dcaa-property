@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/Oleja123/dcaa-property/internal/config"
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
 	propertydb "github.com/Oleja123/dcaa-property/internal/repository/property/db"
 	"github.com/Oleja123/dcaa-property/pkg/client"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
+	"github.com/Oleja123/dcaa-property/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
