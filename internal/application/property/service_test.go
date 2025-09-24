@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	propertyservice "github.com/Oleja123/dcaa-property/internal/application/property"
 	propertydto "github.com/Oleja123/dcaa-property/internal/dto/property"
-	propertymock "github.com/Oleja123/dcaa-property/internal/repository/property"
-	propertyservice "github.com/Oleja123/dcaa-property/internal/service/property"
+	propertymock "github.com/Oleja123/dcaa-property/internal/infrastructure/property"
 	optionalType "github.com/denpa16/optional-go-type"
 	"github.com/stretchr/testify/assert"
 )

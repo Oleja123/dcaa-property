@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
-	propertydb "github.com/Oleja123/dcaa-property/internal/repository/property/db"
+	propertydb "github.com/Oleja123/dcaa-property/internal/infrastructure/property/db"
 	"github.com/Oleja123/dcaa-property/pkg/client"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
 	"github.com/Oleja123/dcaa-property/pkg/config"

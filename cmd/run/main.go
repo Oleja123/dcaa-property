@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	propertyservice "github.com/Oleja123/dcaa-property/internal/application/property"
 	propertyhandler "github.com/Oleja123/dcaa-property/internal/handler/property"
-	propertydb "github.com/Oleja123/dcaa-property/internal/repository/property/db"
-	propertyservice "github.com/Oleja123/dcaa-property/internal/service/property"
+	propertydb "github.com/Oleja123/dcaa-property/internal/infrastructure/property/db"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
 	"github.com/Oleja123/dcaa-property/pkg/config"
-	_ "github.com/lib/pq"
 )
 
 func main() {
