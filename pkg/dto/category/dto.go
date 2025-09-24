@@ -7,3 +7,10 @@ type CategoryDTO struct {
 	Name optionalType.OptionalString `json:"name"`
 	Info optionalType.OptionalString `json:"info"`
 }
+
+func (c *CategoryDTO) Validate(isUpdate bool) bool {
+	if !c.Name.Valid || (isUpdate && !c.Id.Valid) || !c.Info.Defined {
+		return false
+	}
+	return true
+}
