@@ -44,8 +44,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/properties", handler.Handle)
-	mux.HandleFunc("/properties/{id}", handler.HandleWithId)
+	mux.HandleFunc("/", handler.Handle)
+	mux.HandleFunc("/{id}", handler.HandleWithId)
 
 	s := http.Server{
 		Addr:         ":8080",
