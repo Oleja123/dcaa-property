@@ -12,11 +12,17 @@ import (
 	categoryhttpclient "github.com/Oleja123/dcaa-property/internal/infrastructure/category/http"
 	propertydb "github.com/Oleja123/dcaa-property/internal/infrastructure/property/db"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
-	"github.com/Oleja123/dcaa-property/pkg/config"
+	configpkg "github.com/Oleja123/dcaa-property/pkg/config"
 )
 
 func main() {
-	config, err := config.LoadConfig("config.yaml")
+	config, err := configpkg.LoadConfig("config.yaml")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	apiurl, err := configpkg.LoadAPIUrl("apiurl.yaml")
 
 	if err != nil {
 		log.Fatal(err)
@@ -29,7 +35,7 @@ func main() {
 	}
 
 	repository := propertydb.NewRepository(client)
-	categoryClient := categoryhttpclient.NewClient("http://localhost:8081/categories")
+	categoryClient := categoryhttpclient.NewClient(apiurl.Url)
 
 	categoryService := categoryservice.NewService(categoryClient)
 	propertyService := propertyservice.NewService(repository, categoryService)
