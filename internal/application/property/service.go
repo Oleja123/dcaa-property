@@ -10,6 +10,7 @@ import (
 	"github.com/Oleja123/dcaa-property/internal/domain/category"
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
 	propertydto "github.com/Oleja123/dcaa-property/internal/dto/property"
+	categorydto "github.com/Oleja123/dcaa-property/pkg/dto/category"
 	myErrors "github.com/Oleja123/dcaa-property/pkg/errors"
 	optionalType "github.com/denpa16/optional-go-type"
 )
@@ -38,6 +39,21 @@ func (ps *Service) PropertyToDTO(p property.Property) propertydto.PropertyDTO {
 	lastUpdateStr := p.LastUpdate.Format(time.RFC3339)
 	dto.LastUpdate = optionalType.NewOptionalString(&lastUpdateStr)
 	return dto
+}
+
+func (ps *Service) PropertyDTOToExtended(p propertydto.PropertyDTO, ca categorydto.CategoryDTO) propertydto.ExtendedPropertyDTO {
+	edto := propertydto.ExtendedPropertyDTO{
+		Id:         *p.Id.Value,
+		Name:       *p.Name.Value,
+		Addr:       *p.Addr.Value,
+		Price:      *p.Price.Value,
+		Info:       *p.Info.Value,
+		CategoryId: *p.CategoryId.Value,
+		Category:   ca,
+		LastUpdate: *p.LastUpdate.Value,
+	}
+
+	return edto
 }
 
 func (ps *Service) PropertyFromDTO(ctx context.Context, dto propertydto.PropertyDTO) property.Property {
@@ -118,16 +134,24 @@ func (ps *Service) FindAll(ctx context.Context) ([]propertydto.PropertyDTO, erro
 	return res, nil
 }
 
-func (ps *Service) FindOne(ctx context.Context, id int) (propertydto.PropertyDTO, error) {
+func (ps *Service) FindOne(ctx context.Context, id int) (propertydto.ExtendedPropertyDTO, error) {
 	pr, err := ps.repository.FindOne(ctx, id)
 	switch {
 	case errors.Is(err, myErrors.ErrNotFound):
-		return propertydto.PropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
+		return propertydto.ExtendedPropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
 	case err != nil:
-		return propertydto.PropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
+		return propertydto.ExtendedPropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
+	}
+	ca, err := ps.categoryService.FindOne(pr.CategoryId)
+	switch {
+	case errors.Is(err, myErrors.ErrNotFound):
+		ps.Delete(ctx, id)
+		return propertydto.ExtendedPropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
+	case err != nil:
+		return propertydto.ExtendedPropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
 	}
 
-	return ps.PropertyToDTO(pr), nil
+	return ps.PropertyDTOToExtended(ps.PropertyToDTO(pr), ca), nil
 }
 
 func NewService(repo property.Repository, cs category.Service) *Service {

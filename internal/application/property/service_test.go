@@ -75,7 +75,8 @@ func TestPropertyService(t *testing.T) {
 
 	found, err := service.FindOne(ctx, 1)
 	assert.NoError(t, err)
-	assert.Equal(t, "House", *found.Name.Value)
+	assert.Equal(t, "House", found.Name)
+	assert.Equal(t, "Category", *found.Category.Name.Value)
 
 	found, err = service.FindOne(ctx, 0)
 	assert.ErrorAs(t, err, &myErrors.ErrNotFound)
