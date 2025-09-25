@@ -24,12 +24,6 @@ func (p *PropertyDTO) Validate(isUpdate bool) bool {
 }
 
 type ExtendedPropertyDTO struct {
-	Id         int                     `json:"id"`
-	Name       string                  `json:"name"`
-	Addr       string                  `json:"addr"`
-	Price      float64                 `json:"price"`
-	Info       string                  `json:"info"`
-	CategoryId int                     `json:"category_id"`
-	Category   categorydto.CategoryDTO `json:"category"`
-	LastUpdate string                  `json:"last_update"`
+	PropertyDTO
+	Category categorydto.CategoryDTO `json:"category"`
 }

@@ -42,22 +42,7 @@ func (ps *Service) PropertyToDTO(p property.Property) propertydto.PropertyDTO {
 }
 
 func (ps *Service) PropertyDTOToExtended(p propertydto.PropertyDTO, ca categorydto.CategoryDTO) propertydto.ExtendedPropertyDTO {
-	edto := propertydto.ExtendedPropertyDTO{
-		Id:         *p.Id.Value,
-		Name:       *p.Name.Value,
-		Addr:       *p.Addr.Value,
-		CategoryId: *p.CategoryId.Value,
-		Category:   ca,
-		LastUpdate: *p.LastUpdate.Value,
-	}
-	if p.Info.Valid {
-		edto.Info = *p.Info.Value
-	}
-	if p.Price.Valid {
-		edto.Price = *p.Price.Value
-	}
-
-	return edto
+	return propertydto.ExtendedPropertyDTO{PropertyDTO: p, Category: ca}
 }
 
 func (ps *Service) PropertyFromDTO(ctx context.Context, dto propertydto.PropertyDTO) property.Property {
