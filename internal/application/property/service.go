@@ -46,11 +46,15 @@ func (ps *Service) PropertyDTOToExtended(p propertydto.PropertyDTO, ca categoryd
 		Id:         *p.Id.Value,
 		Name:       *p.Name.Value,
 		Addr:       *p.Addr.Value,
-		Price:      *p.Price.Value,
-		Info:       *p.Info.Value,
 		CategoryId: *p.CategoryId.Value,
 		Category:   ca,
 		LastUpdate: *p.LastUpdate.Value,
+	}
+	if p.Info.Valid {
+		edto.Info = *p.Info.Value
+	}
+	if p.Price.Valid {
+		edto.Price = *p.Price.Value
 	}
 
 	return edto
