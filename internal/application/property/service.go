@@ -84,10 +84,10 @@ func (ps *Service) Create(ctx context.Context, dto propertydto.PropertyDTO) (int
 func (ps *Service) Update(ctx context.Context, dto propertydto.PropertyDTO) error {
 	pr := ps.PropertyFromDTO(ctx, dto)
 	if _, err := ps.repository.FindOne(ctx, pr.Id); err != nil {
-		return fmt.Errorf("ошибка при создании обновлении сущности с id: %d: %w", pr.Id, err)
+		return fmt.Errorf("ошибка при обновлении сущности с id: %d: %w", pr.Id, err)
 	}
 	if _, err := ps.categoryService.FindOne(pr.CategoryId); err != nil {
-		return fmt.Errorf("ошибка при создании обновлении сущности с id: %d: %w", pr.Id, err)
+		return fmt.Errorf("ошибка при обновлении сущности с id: %d: %w", pr.Id, err)
 	}
 	err := ps.repository.Update(ctx, pr)
 	if err != nil {
@@ -99,7 +99,7 @@ func (ps *Service) Update(ctx context.Context, dto propertydto.PropertyDTO) erro
 
 func (ps *Service) Delete(ctx context.Context, id int) error {
 	if _, err := ps.repository.FindOne(ctx, id); err != nil {
-		return fmt.Errorf("ошибка при создании удалении сущности с id: %d: %w", id, err)
+		return fmt.Errorf("ошибка при удалении сущности с id: %d: %w", id, err)
 	}
 	err := ps.repository.Delete(ctx, id)
 	if err != nil {
