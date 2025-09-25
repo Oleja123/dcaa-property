@@ -3,19 +3,23 @@ package propertyservice
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/Oleja123/dcaa-property/internal/domain/category"
 	"github.com/Oleja123/dcaa-property/internal/domain/property"
 	propertydto "github.com/Oleja123/dcaa-property/internal/dto/property"
+	myErrors "github.com/Oleja123/dcaa-property/pkg/errors"
 	optionalType "github.com/denpa16/optional-go-type"
 )
 
-type propertyService struct {
-	repository property.Repository
+type Service struct {
+	repository      property.Repository
+	categoryService category.Service
 }
 
-func (ps *propertyService) PropertyToDTO(p property.Property) propertydto.PropertyDTO {
+func (ps *Service) PropertyToDTO(p property.Property) propertydto.PropertyDTO {
 	dto := propertydto.PropertyDTO{}
 	dto.Addr = optionalType.NewOptionalString(&p.Addr)
 	dto.CategoryId = optionalType.NewOptionalInt(&p.CategoryId)
@@ -36,7 +40,7 @@ func (ps *propertyService) PropertyToDTO(p property.Property) propertydto.Proper
 	return dto
 }
 
-func (ps *propertyService) PropertyFromDTO(ctx context.Context, dto propertydto.PropertyDTO) property.Property {
+func (ps *Service) PropertyFromDTO(ctx context.Context, dto propertydto.PropertyDTO) property.Property {
 	p := property.Property{}
 	p.Addr = *dto.Addr.Value
 	p.CategoryId = *dto.CategoryId.Value
@@ -59,40 +63,52 @@ func (ps *propertyService) PropertyFromDTO(ctx context.Context, dto propertydto.
 	return p
 }
 
-func (ps *propertyService) Create(ctx context.Context, dto propertydto.PropertyDTO) (int, error) {
-	property := ps.PropertyFromDTO(ctx, dto)
-	id, err := ps.repository.Create(ctx, property)
+func (ps *Service) Create(ctx context.Context, dto propertydto.PropertyDTO) (int, error) {
+	pr := ps.PropertyFromDTO(ctx, dto)
+	if _, err := ps.categoryService.FindOne(pr.CategoryId); err != nil {
+		return 0, fmt.Errorf("ошибка при создании сущности собственности: %w", err)
+	}
+	id, err := ps.repository.Create(ctx, pr)
 	if err != nil {
 		fmt.Println(err)
-		return 0, fmt.Errorf("ошибка при создании сущности собственности")
+		return 0, fmt.Errorf("ошибка при создании сущности собственности: %w", err)
 	}
 	return id, nil
 }
 
-func (ps *propertyService) Update(ctx context.Context, dto propertydto.PropertyDTO) error {
+func (ps *Service) Update(ctx context.Context, dto propertydto.PropertyDTO) error {
 	pr := ps.PropertyFromDTO(ctx, dto)
+	if _, err := ps.repository.FindOne(ctx, pr.Id); err != nil {
+		return fmt.Errorf("ошибка при создании обновлении сущности с id: %d: %w", pr.Id, err)
+	}
+	if _, err := ps.categoryService.FindOne(pr.CategoryId); err != nil {
+		return fmt.Errorf("ошибка при создании обновлении сущности с id: %d: %w", pr.Id, err)
+	}
 	err := ps.repository.Update(ctx, pr)
 	if err != nil {
 		fmt.Println(err)
-		return fmt.Errorf("ошибка при обновлении сущности собственности с id: %d", *dto.Id.Value)
+		return fmt.Errorf("ошибка при обновлении сущности собственности с id: %d: %w", *dto.Id.Value, err)
 	}
 	return nil
 }
 
-func (ps *propertyService) Delete(ctx context.Context, id int) error {
+func (ps *Service) Delete(ctx context.Context, id int) error {
+	if _, err := ps.repository.FindOne(ctx, id); err != nil {
+		return fmt.Errorf("ошибка при создании удалении сущности с id: %d: %w", id, err)
+	}
 	err := ps.repository.Delete(ctx, id)
 	if err != nil {
 		fmt.Println(err)
-		return fmt.Errorf("ошибка при удалении сущности собственности с id: %d", id)
+		return fmt.Errorf("ошибка при удалении сущности собственности с id: %d: %w", id, err)
 	}
 	return nil
 }
 
-func (ps *propertyService) FindAll(ctx context.Context) ([]propertydto.PropertyDTO, error) {
+func (ps *Service) FindAll(ctx context.Context) ([]propertydto.PropertyDTO, error) {
 	pr, err := ps.repository.FindAll(ctx)
 	if err != nil {
 		fmt.Println(err)
-		return nil, fmt.Errorf("ошибка при получении списка записей собственностей")
+		return nil, fmt.Errorf("ошибка при получении списка записей собственностей: %w", err)
 	}
 	res := make([]propertydto.PropertyDTO, 0, len(pr))
 	for _, val := range pr {
@@ -102,18 +118,21 @@ func (ps *propertyService) FindAll(ctx context.Context) ([]propertydto.PropertyD
 	return res, nil
 }
 
-func (ps *propertyService) FindOne(ctx context.Context, id int) (propertydto.PropertyDTO, error) {
+func (ps *Service) FindOne(ctx context.Context, id int) (propertydto.PropertyDTO, error) {
 	pr, err := ps.repository.FindOne(ctx, id)
-	if err != nil {
-		fmt.Println(err)
-		return propertydto.PropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d", id)
+	switch {
+	case errors.Is(err, myErrors.ErrNotFound):
+		return propertydto.PropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
+	case err != nil:
+		return propertydto.PropertyDTO{}, fmt.Errorf("ошибка при получении записи собственности с id: %d: %w", id, err)
 	}
 
 	return ps.PropertyToDTO(pr), nil
 }
 
-func NewService(repo property.Repository) property.Service {
-	return &propertyService{
-		repository: repo,
+func NewService(repo property.Repository, cs category.Service) *Service {
+	return &Service{
+		repository:      repo,
+		categoryService: cs,
 	}
 }
